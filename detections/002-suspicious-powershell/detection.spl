@@ -1,0 +1,6 @@
+host="SOC-WIN01" source="WinEventLog:Security"
+| rex field=_raw "<EventID[^>]*>(?<EventCode>\d+)</EventID>"
+| search EventCode=4688
+| where like(lower(New_Process_Name), "%\\powershell.exe")
+| where match(lower(Process_Command_Line), "-(enc|enco|encod|encode|encodedcommand)(\s|$)")
+| table _time host New_Process_Name Creator_Process_Name Process_Command_Line

@@ -1,0 +1,9 @@
+host="SOC-WIN01" source="WinEventLog:Security" EventCode=4698
+| rex field=_raw "Subject:\s+Security ID:\s+\S+\s+Account Name:\s+(?<ActorUser>\S+)"
+| rex field=_raw "Task Name:\s+(?<TaskName>[^\r\n]+)"
+| rex field=_raw "<Command>(?<TaskCommand>[^<]+)</Command>"
+| rex field=_raw "<Arguments>(?<TaskArguments>[^<]+)</Arguments>"
+| eval TaskName=trim(TaskName)
+| where match(lower(TaskCommand), "(cmd\.exe|powershell\.exe|pwsh\.exe|wscript\.exe|cscript\.exe|mshta\.exe)")
+| table _time host ActorUser TaskName TaskCommand TaskArguments
+| sort 0 -_time

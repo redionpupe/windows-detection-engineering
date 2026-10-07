@@ -1,0 +1,7 @@
+host="SOC-WIN01" source="WinEventLog:Security" EventCode=4732
+| rex field=_raw "Subject:\s+Security ID:\s+\S+\s+Account Name:\s+(?<ActorUser>\S+)"
+| rex field=_raw "Member:\s+Security ID:\s+(?<MemberSID>\S+)"
+| rex field=_raw "Group:\s+Security ID:\s+\S+\s+Group Name:\s+(?<TargetGroup>[^\r\n]+)"
+| where trim(TargetGroup)="Administrators"
+| table _time host ActorUser MemberSID TargetGroup
+| sort 0 -_time

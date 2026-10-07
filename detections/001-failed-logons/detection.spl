@@ -1,0 +1,7 @@
+host="SOC-WIN01" source="WinEventLog:Security"
+| rex field=_raw "<EventID[^>]*>(?<EventCode>\d+)</EventID>"
+| search EventCode=4625
+| rex field=_raw "Account For Which Logon Failed:\s+Security ID:\s+\S+\s+Account Name:\s+(?<TargetUser>\S+)"
+| bin _time span=5m
+| stats count as failed_attempts values(Source_Network_Address) as source_ips values(Logon_Type) as logon_types values(Failure_Reason) as failure_reasons by _time, host, TargetUser
+| where failed_attempts >= 5

@@ -1,0 +1,7 @@
+host="SOC-WIN01" source="WinEventLog:Microsoft-Windows-PowerShell/Operational"
+| rex field=_raw "<EventID[^>]*>(?<EventCode>\d+)</EventID>"
+| search EventCode=4104
+| where match(lower(_raw), "set-mppreference") AND match(lower(_raw), "disablerealtimemonitoring")
+| rex field=_raw "<Data Name='ScriptBlockText'>(?<ScriptBlockText>.*?)</Data>"
+| table _time host ScriptBlockText
+| sort 0 -_time
